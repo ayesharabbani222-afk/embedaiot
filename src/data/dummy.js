@@ -5,14 +5,14 @@
 // post-login Device/Product Selection screen. Orgs without this field fall
 // back to ['ems'] so nothing pre-existing breaks.
 export const organizations = [
-  { id: 1, name: 'Ambition', description: 'Main technology partner', status: 'Active',  createdAt: '2024-01-15', deviceTypes: ['ems', 'aqms', 'soil', 'airpurifier'] },
+  { id: 1, name: 'Ambition', description: 'Main technology partner', status: 'Active',  createdAt: '2024-01-15', deviceTypes: ['ems', 'aqms', 'soil', 'weatherstation'] },
   { id: 2, name: 'FICO',                description: 'Industrial furnace client',status: 'Active',  createdAt: '2024-02-10', deviceTypes: ['ems'] },
   { id: 3, name: 'C Power',             description: 'Power distribution',       status: 'Active',  createdAt: '2024-03-05', deviceTypes: ['ems'] },
-  { id: 4, name: 'NUST',                description: 'University campus EMS',    status: 'Active',  createdAt: '2024-03-20', deviceTypes: ['ems', 'aqms', 'other'] },
+  { id: 4, name: 'NUST',                description: 'University campus EMS',    status: 'Active',  createdAt: '2024-03-20', deviceTypes: ['ems', 'aqms', 'weatherstation', 'other'] },
   { id: 5, name: 'Guest Org',           description: 'Demo organization',        status: 'Inactive',createdAt: '2024-04-01', deviceTypes: ['ems'] },
   { id: 6, name: 'Supra Steel',         description: 'Steel furnace monitoring', status: 'Active',  createdAt: '2024-04-15', deviceTypes: ['ems'] },
-  { id: 7, name: 'Japan Electronics',   description: 'Electronics manufacturer', status: 'Active',  createdAt: '2024-05-01', deviceTypes: ['ems', 'airpurifier'] },
-  { id: 8, name: 'Bakery',              description: 'Commercial bakery',        status: 'Active',  createdAt: '2024-05-10', deviceTypes: ['ems', 'airpurifier'] },
+  { id: 7, name: 'Japan Electronics',   description: 'Electronics manufacturer', status: 'Active',  createdAt: '2024-05-01', deviceTypes: ['ems', 'weatherstation'] },
+  { id: 8, name: 'Bakery',              description: 'Commercial bakery',        status: 'Active',  createdAt: '2024-05-10', deviceTypes: ['ems', 'weatherstation'] },
   { id: 9, name: 'Red Chilli',          description: 'Restaurant chain',         status: 'Active',  createdAt: '2024-05-20', deviceTypes: ['ems'] },
   { id:10, name: 'Delicia Warehouse',   description: 'Cold storage facility',    status: 'Active',  createdAt: '2024-06-01', deviceTypes: ['ems', 'soil'] },
 ]
@@ -22,17 +22,17 @@ export const organizations = [
 // this specific user has been given access to (set by the org admin on
 // Org > Users). Falls back to the parent org's full list when unset.
 export const users = [
-  { id:1,  org:'Ambition', name:'Huzaifa Ahmed',   email:'huzaifa@cf.com',   phone:'+92-300-1234567', role:'Admin',    status:'Active',   createdAt:'2024-01-20', deviceTypes: ['ems', 'aqms', 'soil', 'airpurifier'] },
+  { id:1,  org:'Ambition', name:'Huzaifa Ahmed',   email:'huzaifa@cf.com',   phone:'+92-300-1234567', role:'Admin',    status:'Active',   createdAt:'2024-01-20', deviceTypes: ['ems', 'aqms', 'soil', 'weatherstation'] },
   { id:11, org:'Ambition', name:'Ayesha Khan',     email:'ayesha.ambition@cf.com', phone:'+92-311-1029384', role:'Customer', status:'Active', createdAt:'2026-06-12', deviceTypes: ['ems'] },
   { id:12, org:'Ambition', name:'Omar Farooq',     email:'omar.ambition@cf.com',   phone:'+92-312-5647382', role:'Customer', status:'Active', createdAt:'2026-06-18', deviceTypes: ['ems', 'aqms'] },
   { id:2,  org:'FICO',                name:'Ali Raza',         email:'ali@fico.com',      phone:'+92-301-2345678', role:'Customer', status:'Active',   createdAt:'2024-02-15', deviceTypes: ['ems'] },
   { id:3,  org:'C Power',             name:'Sara Khan',        email:'sara@cpower.com',   phone:'+92-302-3456789', role:'Customer', status:'Active',   createdAt:'2024-03-10', deviceTypes: ['ems'] },
-  { id:4,  org:'NUST',                name:'Ahmed Malik',      email:'ahmed@nust.edu',    phone:'+92-303-4567890', role:'Customer', status:'Active',   createdAt:'2024-03-25', deviceTypes: ['ems', 'aqms'] },
+  { id:4,  org:'NUST',                name:'Ahmed Malik',      email:'ahmed@nust.edu',    phone:'+92-303-4567890', role:'Customer', status:'Active',   createdAt:'2024-03-25', deviceTypes: ['ems', 'aqms', 'weatherstation'] },
   { id:5,  org:'Guest Org',           name:'Guest User',       email:'guest@guest.com',   phone:'+92-304-5678901', role:'Customer', status:'Inactive', createdAt:'2024-04-05', deviceTypes: ['ems'] },
   { id:6,  org:'Supra Steel',         name:'Bilal Hussain',    email:'bilal@supra.com',   phone:'+92-305-6789012', role:'Customer', status:'Active',   createdAt:'2024-04-20', deviceTypes: ['ems'] },
   { id:7,  org:'Delicia Warehouse',   name:'Miss Maryam',      email:'maryam@delicia.com',phone:'+92-306-7890123', role:'Customer', status:'Active',   createdAt:'2024-06-05', deviceTypes: ['ems', 'soil'] },
-  { id:8,  org:'Japan Electronics',   name:'Taro Yamamoto',    email:'taro@japaelec.com', phone:'+92-307-8901234', role:'Customer', status:'Active',   createdAt:'2024-05-05', deviceTypes: ['ems', 'airpurifier'] },
-  { id:9,  org:'Bakery',              name:'Fatima Zahra',     email:'fatima@bakery.com', phone:'+92-308-9012345', role:'Customer', status:'Active',   createdAt:'2024-05-15', deviceTypes: ['ems', 'airpurifier'] },
+  { id:8,  org:'Japan Electronics',   name:'Taro Yamamoto',    email:'taro@japaelec.com', phone:'+92-307-8901234', role:'Customer', status:'Active',   createdAt:'2024-05-05', deviceTypes: ['ems', 'weatherstation'] },
+  { id:9,  org:'Bakery',              name:'Fatima Zahra',     email:'fatima@bakery.com', phone:'+92-308-9012345', role:'Customer', status:'Active',   createdAt:'2024-05-15', deviceTypes: ['ems', 'weatherstation'] },
   { id:10, org:'Red Chilli',          name:'Usman Ghani',      email:'usman@redchilli.com',phone:'+92-309-0123456',role:'Customer', status:'Active',   createdAt:'2024-05-25', deviceTypes: ['ems'] },
 ]
 
@@ -104,14 +104,12 @@ export const devices = [
   { id:201, status:'Online', name:'AFL - AQMS Warehouse',      org:'Ambition',          gateway:'AFL-GW-BSIDE', template:'Embed AIoT AQMS Node', switchOn:true, deviceType:'aqms' },
   { id:202, status:'Online', name:'AFL - Soil Probe Field A',  org:'Ambition',          gateway:'AFL-GW-MAIN',  template:'Embed AIoT Soil Probe', switchOn:true, deviceType:'soil' },
   { id:203, status:'Offline',name:'AFL - Soil Probe Field B',  org:'Ambition',          gateway:'AFL-GW-MAIN',  template:'Embed AIoT Soil Probe', switchOn:false, deviceType:'soil' },
-  { id:204, status:'Online', name:'AFL - Air Purifier Lobby',  org:'Ambition',          gateway:'AFL-GW-BSIDE', template:'Embed AIoT Air Purifier', switchOn:true, deviceType:'airpurifier' },
-  { id:205, status:'Online', name:'AFL - Air Purifier Office', org:'Ambition',          gateway:'AFL-GW-BSIDE', template:'Embed AIoT Air Purifier', switchOn:true, deviceType:'airpurifier' },
   { id:206, status:'Online', name:'NUST - AQMS Block A',       org:'NUST',              gateway:'NUST-GW-001',  template:'Embed AIoT AQMS Node', switchOn:true, deviceType:'aqms' },
   { id:207, status:'Online', name:'NUST - AQMS Block B',       org:'NUST',              gateway:'NUST-GW-001',  template:'Embed AIoT AQMS Node', switchOn:true, deviceType:'aqms' },
   { id:208, status:'Online', name:'Delicia - Soil Probe Bay 1',org:'Delicia Warehouse', gateway:'DELI-GW-001',  template:'Embed AIoT Soil Probe', switchOn:true, deviceType:'soil' },
   { id:209, status:'Online', name:'Delicia - Soil Probe Bay 2',org:'Delicia Warehouse', gateway:'DELI-GW-001',  template:'Embed AIoT Soil Probe', switchOn:true, deviceType:'soil' },
-  { id:210, status:'Online', name:'Japan Elec - Air Purifier Floor 1', org:'Japan Electronics', gateway:'DELI-GW-001', template:'Embed AIoT Air Purifier', switchOn:true, deviceType:'airpurifier' },
-  { id:211, status:'Offline',name:'Bakery - Air Purifier Kitchen',     org:'Bakery',            gateway:'DELI-GW-001', template:'Embed AIoT Air Purifier', switchOn:false, deviceType:'airpurifier' },
+  { id:212, status:'Online', name:'AFL - Weather Station Alpha',org:'Ambition',         gateway:'AFL-GW-MAIN',  template:'Embed AIoT Weather Station', switchOn:true, deviceType:'weatherstation' },
+  { id:213, status:'Online', name:'NUST - Campus Weather Station', org:'NUST',          gateway:'NUST-GW-001',  template:'Embed AIoT Weather Station', switchOn:true, deviceType:'weatherstation' },
 ]
 
 // Device Templates

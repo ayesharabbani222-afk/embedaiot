@@ -268,6 +268,7 @@ export function scopeLabel(hierarchy, scope) {
 
 // ── Metric Catalog ─────────────────────────────────────────────────────
 export const METRICS = {
+  // EMS
   energyConsumption: { label: 'Energy Consumption', unit: 'kWh', base: 420, variance: 180, color: '#F5A623' },
   activePower:       { label: 'Active Power',        unit: 'kW',  base: 68,  variance: 30,  color: '#3B82F6' },
   voltage:           { label: 'Voltage',              unit: 'V',   base: 228, variance: 8,   color: '#F5A623' },
@@ -277,6 +278,49 @@ export const METRICS = {
   carbonEmissions:   { label: 'Carbon Emissions',     unit: 'kg CO₂', base: 210, variance: 90, color: '#16A34A' },
   devicesOnline:     { label: 'Devices Online',       unit: '',    base: 14,  variance: 4,   color: '#2563EB' },
   activeAlarms:      { label: 'Active Alarms',        unit: '',    base: 3,   variance: 3,   color: '#DC2626' },
+
+  // Soil Moisture Meter (4 variables)
+  moisture:    { label: 'Soil Moisture',    unit: '%',  base: 48,  variance: 14, color: '#3B82F6' },
+  soilTemp:    { label: 'Soil Temperature', unit: '°C', base: 21,  variance: 4,  color: '#F5A623' },
+  airMoisture: { label: 'Air Moisture',     unit: '%',  base: 56,  variance: 15, color: '#10B981' },
+  airTemp:     { label: 'Air Temperature',  unit: '°C', base: 26,  variance: 6,  color: '#EF4444' },
+
+  // AQMS (24 variables)
+  time1:  { label: 'Node Clock',       unit: '',      base: 1,    variance: 0,   color: '#6B7280' },
+  id:     { label: 'Node Identifier',  unit: '',      base: 1,    variance: 0,   color: '#6B7280' },
+  tx:     { label: 'Packet Counter',   unit: '',      base: 2450, variance: 400, color: '#6B7280' },
+  b:      { label: 'Battery Level',    unit: '%',     base: 94,   variance: 4,   color: '#10B981' },
+  t:      { label: 'Temperature',      unit: '°C',    base: 25.4, variance: 5,   color: '#F5A623' },
+  rh:     { label: 'Relative Humidity',unit: '%',     base: 54,   variance: 12,  color: '#3B82F6' },
+  mic_v:  { label: 'Acoustic / Noise', unit: 'dB',    base: 52,   variance: 16,  color: '#8B5CF6' },
+  sk:     { label: 'Smoke Index',      unit: 'ppm',   base: 0.18, variance: 0.12,color: '#6B7280' },
+  oz:     { label: 'Ozone',            unit: 'ppb',   base: 32,   variance: 15,  color: '#06B6D4' },
+  so2:    { label: 'Sulfur Dioxide',   unit: 'ppb',   base: 14,   variance: 8,   color: '#F97316' },
+  du:     { label: 'Dust Density',     unit: 'µg/m³', base: 45,   variance: 25,  color: '#D97706' },
+  pm1:    { label: 'PM1.0',            unit: 'µg/m³', base: 18,   variance: 10,  color: '#EAB308' },
+  pm25:   { label: 'PM2.5',            unit: 'µg/m³', base: 34,   variance: 22,  color: '#EF4444' },
+  pm10:   { label: 'PM10',             unit: 'µg/m³', base: 58,   variance: 30,  color: '#DC2626' },
+  co2:    { label: 'Carbon Dioxide',   unit: 'ppm',   base: 620,  variance: 180, color: '#F5A623' },
+  tvoc:   { label: 'Total VOC',        unit: 'ppb',   base: 165,  variance: 85,  color: '#8B5CF6' },
+  co:     { label: 'Carbon Monoxide',  unit: 'ppm',   base: 1.8,  variance: 1.2, color: '#EF4444' },
+  no2:    { label: 'Nitrogen Dioxide', unit: 'ppb',   base: 24,   variance: 12,  color: '#EA580C' },
+  nh3:    { label: 'Ammonia',          unit: 'ppm',   base: 0.65, variance: 0.4, color: '#16A34A' },
+  c3h8:   { label: 'Propane',          unit: 'ppm',   base: 0.35, variance: 0.2, color: '#84CC16' },
+  c4h10:  { label: 'Butane',           unit: 'ppm',   base: 0.40, variance: 0.25,color: '#A855F7' },
+  ch4:    { label: 'Methane',          unit: 'ppm',   base: 1.85, variance: 0.8, color: '#EC4899' },
+  h2:     { label: 'Hydrogen',         unit: 'ppm',   base: 0.22, variance: 0.15,color: '#06B6D4' },
+  c2h50h: { label: 'Ethanol',          unit: 'ppm',   base: 0.48, variance: 0.3, color: '#F43F5E' },
+
+  // Weather Station (13 variables)
+  time:   { label: 'Station Time',     unit: '',      base: 1,    variance: 0,   color: '#6B7280' },
+  t1:     { label: 'Air Temperature',  unit: '°C',    base: 24.5, variance: 6,   color: '#F5A623' },
+  rh1:    { label: 'Relative Humidity',unit: '%',     base: 52,   variance: 15,  color: '#3B82F6' },
+  l1:     { label: 'Light Intensity',  unit: 'lux',   base: 18500,variance: 12000,color: '#FBBF24' },
+  voc:    { label: 'VOC Index',        unit: 'ppb',   base: 140,  variance: 60,  color: '#8B5CF6' },
+  p:      { label: 'Atmospheric Press',unit: 'hPa',   base: 1012, variance: 8,   color: '#64748B' },
+  ws:     { label: 'Wind Speed',       unit: 'm/s',   base: 4.8,  variance: 3.2, color: '#0EA5E9' },
+  wd:     { label: 'Wind Direction',   unit: '°',     base: 180,  variance: 160, color: '#0284C7' },
+  r:      { label: 'Rainfall',         unit: 'mm/h',  base: 1.2,  variance: 2.5, color: '#2563EB' },
 }
 
 export const TIME_RANGES = {
@@ -330,16 +374,24 @@ export function generateSeries(orgName, scope, metric, timeRange = 'today') {
     }
   }
 
-  // Root is 1.0; each nested level scales down by 25-35%
-  const scale = Math.max(0.05, Math.pow(0.7, depth))
+  // Facility power metrics scale with depth; ambient environmental metrics don't scale down
+  const isFacilityPower = ['energyConsumption', 'activePower', 'cost', 'carbonEmissions', 'current'].includes(metric)
+  const scale = isFacilityPower ? Math.max(0.05, Math.pow(0.7, depth)) : 1.0
 
   const data = []
   for (let i = 0; i < points; i++) {
     const wave = Math.sin((i / points) * Math.PI * 2) * 0.3 + 1
     const noise = 0.85 + rnd() * 0.3
-    let value = cfg.base * scale * wave * noise + (rnd() - 0.5) * cfg.variance * scale * 0.4
+    let value = isFacilityPower
+      ? cfg.base * scale * wave * noise + (rnd() - 0.5) * cfg.variance * scale * 0.4
+      : cfg.base + Math.sin((i / points) * Math.PI * 2) * (cfg.variance * 0.35) + (rnd() - 0.5) * (cfg.variance * 0.2)
+
     if (metric === 'powerFactor') value = Math.min(0.99, Math.max(0.65, cfg.base + (rnd() - 0.5) * cfg.variance))
     if (metric === 'devicesOnline' || metric === 'activeAlarms') value = Math.max(0, Math.round(cfg.base * scale * (0.7 + rnd() * 0.6)))
+    if (metric === 'b') value = Math.min(100, Math.max(75, Math.round(value)))
+    if (metric === 'p') value = Math.round(value)
+    if (metric === 'r') value = Math.max(0, Math.round(value * 10) / 10)
+
     data.push({ label: timeLabel(timeRange, i), value: Math.round(value * 100) / 100 })
   }
   return data

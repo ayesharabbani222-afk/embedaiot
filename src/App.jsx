@@ -18,6 +18,7 @@ import AdminDashboard      from './pages/admin/AdminDashboard'
 import AdminOrganizations  from './pages/admin/AdminOrganizations'
 import AdminUsers          from './pages/admin/AdminUsers'
 import AdminGateways       from './pages/admin/AdminGateways'
+import AdminMqttBridges    from './pages/admin/AdminMqttBridges'
 import AdminDevices           from './pages/admin/AdminDevices'
 import AdminDeviceTemplates   from './pages/admin/AdminDeviceTemplates'
 import AdminDeviceTemplateSlaves from './pages/admin/AdminDeviceTemplateSlaves'
@@ -121,6 +122,7 @@ function AppRoutes() {
         <Route path="organizations"     element={<AdminOrganizations />} />
         <Route path="users"             element={<AdminUsers />} />
         <Route path="gateways"          element={<AdminGateways />} />
+        <Route path="mqtt-bridges"      element={<AdminMqttBridges />} />
         <Route path="devices"           element={<AdminDevices />} />
         <Route path="device-templates"  element={<AdminDeviceTemplates />} />
         <Route path="device-templates/:templateId/slaves" element={<AdminDeviceTemplateSlaves />} />
@@ -218,17 +220,42 @@ export default function App() {
       const savedDevices = localStorage.getItem('cf-ems-devices')
       let currentDevices = devices
       if (savedDevices) {
-        const parsed = JSON.parse(savedDevices)
+        let parsed = JSON.parse(savedDevices)
+        // Clean out any removed airpurifier devices
+        parsed = parsed.filter(d => d.deviceType !== 'airpurifier')
         const parsedIds = new Set(parsed.map(d => d.id))
         const missing = devices.filter(d => !parsedIds.has(d.id))
-        if (missing.length > 0) {
-          currentDevices = [...parsed, ...missing]
-          localStorage.setItem('cf-ems-devices', JSON.stringify(currentDevices))
-        } else {
-          currentDevices = parsed
-        }
+        currentDevices = [...parsed, ...missing]
+        localStorage.setItem('cf-ems-devices', JSON.stringify(currentDevices))
       } else {
         localStorage.setItem('cf-ems-devices', JSON.stringify(devices))
+      }
+
+      // Sync organizations and users in localStorage to purge airpurifier and add weatherstation
+      const savedOrgs = localStorage.getItem('cf-ems-organizations')
+      if (savedOrgs) {
+        try {
+          const orgs = JSON.parse(savedOrgs).map(o => ({
+            ...o,
+            deviceTypes: (o.deviceTypes || [])
+              .filter(t => t !== 'airpurifier')
+              .concat(o.name === 'Ambition' && !o.deviceTypes?.includes('weatherstation') ? ['weatherstation'] : [])
+          }))
+          localStorage.setItem('cf-ems-organizations', JSON.stringify(orgs))
+        } catch { /* ignore */ }
+      }
+
+      const savedUsers = localStorage.getItem('cf-ems-users')
+      if (savedUsers) {
+        try {
+          const uList = JSON.parse(savedUsers).map(u => ({
+            ...u,
+            deviceTypes: (u.deviceTypes || [])
+              .filter(t => t !== 'airpurifier')
+              .concat(u.email === 'huzaifa@cf.com' && !u.deviceTypes?.includes('weatherstation') ? ['weatherstation'] : [])
+          }))
+          localStorage.setItem('cf-ems-users', JSON.stringify(uList))
+        } catch { /* ignore */ }
       }
 
       // 2. Sync access groups to grant Ambition's Org Admin access to the new AFL devices

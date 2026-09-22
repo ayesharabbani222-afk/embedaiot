@@ -1,0 +1,25 @@
+{
+  "name": "embed-aiot-backend",
+  "version": "1.0.0",
+  "description": "Production Real-Time IoT Backend & Ingestion Pipeline for Embed AIoT (CF Smart EMS)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "migrate": "node src/scripts/migrate.js",
+    "simulate": "node src/simulator/deviceSimulator.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mathjs": "^12.4.1",
+    "morgan": "^1.10.0",
+    "mqtt": "^5.5.0",
+    "pg": "^8.11.5",
+    "socket.io": "^4.7.5"
+  }
+}

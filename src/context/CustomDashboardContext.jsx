@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useMemo } 
 import { useAuth } from './AuthContext'
 import { users as dummyUsers, organizations as dummyOrgs } from '../data/dummy'
 import { DASHBOARD_TEMPLATES, widgetTypeMeta } from '../data/widgetCatalog'
+import { fetchRemoteDashboards, persistRemoteDashboard, deleteRemoteDashboard } from '../api/dashboardService'
 
 const STORAGE_KEY = 'cf-ems-custom-dashboards-v1'
 
@@ -66,13 +67,15 @@ function layoutForWidgets(widgets) {
   })
 }
 
-function buildFromTemplate(templateId, name, targetDevice = null) {
+function buildFromTemplate(templateId, name, targetDevice = null, dashboardType = 'ems') {
   const template = DASHBOARD_TEMPLATES.find(t => t.id === templateId) || DASHBOARD_TEMPLATES[0]
+  const resolvedType = dashboardType || (template.systemType && template.systemType !== 'all' ? template.systemType : 'ems')
   const widgets = template.widgets.map((w, i) => makeWidget(w, i))
   return {
     id: uid('dash'),
     name: name || template.name,
     description: template.description,
+    dashboardType: resolvedType,
     targetDevice,
     visibility: 'private', // 'private' | 'shared'
     context: { level: 'organization', buildingId: null, floorId: null, departmentId: null, timeRange: 'today' },
@@ -103,6 +106,40 @@ export function CustomDashboardProvider({ children }) {
 
   const orgKey = useMemo(() => resolveOrgKey(user, adminSelectedOrg), [user, adminSelectedOrg])
 
+  // Sync with backend API in the background
+  useEffect(() => {
+    let cancelled = false
+    async function syncRemote() {
+      if (!orgKey) return
+      const remote = await fetchRemoteDashboards()
+      if (cancelled || !remote || !remote.length) return
+      setStore(prev => {
+        const localList = prev[orgKey] || []
+        const merged = [...localList]
+        remote.forEach(r => {
+          const idx = merged.findIndex(m => m.id === r.id)
+          const mapped = {
+            id: r.id,
+            name: r.title,
+            description: r.description,
+            dashboardType: r.dashboardType || r.dashboard_type || 'ems',
+            targetDevice: r.targetDevice || r.target_device || null,
+            widgets: r.widgets || [],
+            layout: r.layoutConfig || r.layout_config || [],
+            isDefault: r.isDefault || r.is_default || false,
+            createdAt: r.created_at || new Date().toISOString(),
+            updatedAt: r.updated_at || new Date().toISOString(),
+          }
+          if (idx >= 0) merged[idx] = { ...merged[idx], ...mapped }
+          else merged.push(mapped)
+        })
+        return { ...prev, [orgKey]: merged }
+      })
+    }
+    syncRemote()
+    return () => { cancelled = true }
+  }, [orgKey])
+
   const allForOrg = orgKey ? (store[orgKey] || []) : []
 
   // Visibility rules:
@@ -128,22 +165,29 @@ export function CustomDashboardProvider({ children }) {
     })
   }, [orgKey])
 
-  const createDashboard = useCallback((templateId, name, targetDevice = null) => {
-    const dash = buildFromTemplate(templateId, name, targetDevice)
+  const createDashboard = useCallback((templateId, name, targetDevice = null, dashboardType = 'ems') => {
+    const dash = buildFromTemplate(templateId, name, targetDevice, dashboardType)
     dash.ownerEmail = user?.email
     dash.ownerRole = user?.role
     dash.visibility = user?.role === 'user' ? 'private' : 'private'
     setOrgDashboards(list => [...list, dash])
+    persistRemoteDashboard(dash)
     return dash.id
   }, [setOrgDashboards, user])
 
   const updateDashboard = useCallback((id, patch) => {
-    setOrgDashboards(list => list.map(d => d.id === id
-      ? { ...d, ...patch, updatedAt: new Date().toISOString() }
-      : d))
+    setOrgDashboards(list => list.map(d => {
+      if (d.id === id) {
+        const updated = { ...d, ...patch, updatedAt: new Date().toISOString() }
+        persistRemoteDashboard(updated)
+        return updated
+      }
+      return d
+    }))
   }, [setOrgDashboards])
 
   const deleteDashboard = useCallback((id) => {
+    deleteRemoteDashboard(id)
     setOrgDashboards(list => list.filter(d => d.id !== id))
   }, [setOrgDashboards])
 

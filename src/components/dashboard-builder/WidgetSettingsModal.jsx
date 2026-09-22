@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Modal from '../ui/Modal'
-import { WIDGET_TYPES, METRIC_OPTIONS, GROUP_BY_OPTIONS, COLOR_THEMES, widgetTypeMeta } from '../../data/widgetCatalog'
+import { WIDGET_TYPES, METRIC_OPTIONS, GROUP_BY_OPTIONS, COLOR_THEMES, widgetTypeMeta, getMetricsForSystem, SYSTEM_TYPES } from '../../data/widgetCatalog'
 import { TIME_RANGES, findNodeInTree } from '../../data/facilitiesHierarchy'
-import { Network, Building, Layers, Folder, Cpu, Activity, HelpCircle } from 'lucide-react'
+import { Network, Building, Layers, Folder, Cpu, Activity, HelpCircle, Filter } from 'lucide-react'
 import { useCustomDashboards } from '../../context/CustomDashboardContext'
 import { devices as allDevices } from '../../data/dummy'
 
@@ -24,8 +24,9 @@ function getNodeIcon(type) {
   }
 }
 
-export default function WidgetSettingsModal({ open, onClose, widget, hierarchy, onSave }) {
+export default function WidgetSettingsModal({ open, onClose, widget, hierarchy, onSave, dashboardType = 'ems' }) {
   const [form, setForm] = useState(null)
+  const [metricSystemFilter, setMetricSystemFilter] = useState(dashboardType || 'all')
   const { orgKey } = useCustomDashboards()
   const orgDevices = allDevices.filter(d => d.org === orgKey)
 
@@ -228,7 +229,7 @@ export default function WidgetSettingsModal({ open, onClose, widget, hierarchy, 
                       })}
                     >
                       {METRIC_OPTIONS.filter(m => m.value !== '_none').map(m => (
-                        <option key={m.value} value={m.value}>{m.label}</option>
+                        <option key={m.value} value={m.value}>{m.label} {m.category ? `[${m.category}]` : ''}</option>
                       ))}
                     </select>
                     <input
@@ -257,9 +258,27 @@ export default function WidgetSettingsModal({ open, onClose, widget, hierarchy, 
             </div>
           ) : (
             <div>
-              <label className="label">Data / Metric</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="label mb-0">Data / Metric</label>
+                <div className="flex items-center gap-1 text-[10px]">
+                  <Filter size={10} className="text-surface-400" />
+                  <select
+                    value={metricSystemFilter}
+                    onChange={e => setMetricSystemFilter(e.target.value)}
+                    className="bg-transparent text-primary-600 font-bold border-none p-0 cursor-pointer focus:ring-0 text-[10px]"
+                  >
+                    <option value="all">All Systems</option>
+                    <option value="ems">EMS</option>
+                    <option value="aqms">AQMS</option>
+                    <option value="soil">Soil Moisture</option>
+                    <option value="weatherstation">Weather Station</option>
+                  </select>
+                </div>
+              </div>
               <select className="select" value={form.metric} onChange={e => setForm(f => ({ ...f, metric: e.target.value }))}>
-                {METRIC_OPTIONS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                {getMetricsForSystem(metricSystemFilter === 'all' ? null : metricSystemFilter).map(m => (
+                  <option key={m.value} value={m.value}>{m.label} {m.category ? `[${m.category}]` : ''}</option>
+                ))}
               </select>
             </div>
           )}

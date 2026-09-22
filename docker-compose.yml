@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. TimescaleDB (PostgreSQL 16 with Time-Series Hypertable Extension)
+  # ---------------------------------------------------------------------------
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: embed_timescaledb
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: embed_aiot_ems
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d embed_aiot_ems"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # 2. EMQX (Industrial MQTT 5.0 Broker for Gateway Ingestion)
+  # ---------------------------------------------------------------------------
+  emqx:
+    image: emqx/emqx:5.6.0
+    container_name: embed_emqx
+    restart: always
+    ports:
+      - "1883:1883"      # MQTT Protocol Port
+      - "8083:8083"      # MQTT over WebSockets
+      - "18083:18083"    # EMQX Management Dashboard (admin / public)
+    environment:
+      EMQX_NAME: embed_cluster
+      EMQX_HOST: 127.0.0.1
+    volumes:
+      - emqx_data:/opt/emqx/data
+
+volumes:
+  timescaledb_data:
+  emqx_data:

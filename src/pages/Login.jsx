@@ -32,7 +32,7 @@ const DEMO_ACCOUNTS = [
 ]
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, loginWithCredentials } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -99,13 +99,24 @@ export default function Login() {
     triggerTransition(role)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const match = DEMO_ACCOUNTS.find(a => a.email === email)
-    if (match && password === 'password123') {
-      triggerTransition(match.role)
-    } else {
-      setError('Invalid credentials. Try selecting a demo account below.')
+    setError('')
+    try {
+      if (loginWithCredentials) {
+        await loginWithCredentials(email, password)
+        const role = email.includes('admin') ? 'admin' : (email.includes('org') ? 'org' : 'user')
+        triggerTransition(role)
+      } else {
+        const match = DEMO_ACCOUNTS.find(a => a.email === email)
+        if (match && password === 'password123') {
+          triggerTransition(match.role)
+        } else {
+          setError('Invalid credentials. Try selecting a demo account below.')
+        }
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Invalid credentials.')
     }
   }
 

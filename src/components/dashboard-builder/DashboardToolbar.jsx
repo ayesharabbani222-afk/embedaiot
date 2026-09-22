@@ -66,6 +66,14 @@ export default function DashboardToolbar({
         <button type="button" onClick={onToggleFavorite} className="text-surface-300 hover:text-primary-500 flex-shrink-0">
           <Star size={15} className={dashboard.favorite ? 'fill-primary-500 text-primary-500' : ''} />
         </button>
+        <span className={`badge ${
+          dashboard.dashboardType === 'aqms' ? 'badge-info' :
+          dashboard.dashboardType === 'soil' ? 'badge-success' :
+          dashboard.dashboardType === 'weatherstation' ? 'badge-purple' :
+          dashboard.dashboardType === 'unified' ? 'badge-neutral' : 'badge-primary'
+        } uppercase font-bold text-[10px] flex-shrink-0`}>
+          {dashboard.dashboardType?.toUpperCase() || 'EMS'}
+        </span>
         <span className={`badge ${ownIt ? 'badge-info' : 'badge-neutral'} flex items-center gap-1 flex-shrink-0`}>
           {ownIt ? <User size={10} /> : <Users size={10} />} {ownIt ? 'Owned by you' : 'Shared by organization'}
         </span>

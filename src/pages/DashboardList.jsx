@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Plus, Search, Star, LayoutTemplate, Building2, User, Users, Clock, LayoutGrid, Cpu,
+  Plus, Search, Star, LayoutTemplate, Building2, User, Users, Clock, LayoutGrid, Cpu, Layers,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCustomDashboards } from '../context/CustomDashboardContext'
+import { SYSTEM_TYPES } from '../data/widgetCatalog'
 import NewDashboardModal from '../components/dashboard-builder/NewDashboardModal'
 
 const ROLE_EMPTY_COPY = {
@@ -35,6 +36,7 @@ export default function DashboardList() {
 
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all') // all | mine | shared | favorites
+  const [systemFilter, setSystemFilter] = useState('all') // all | ems | aqms | soil | weatherstation | unified
   const [newOpen, setNewOpen] = useState(false)
 
   const isManager = user?.role === 'admin' || user?.role === 'org'
@@ -45,15 +47,16 @@ export default function DashboardList() {
     if (filter === 'mine') list = list.filter(d => d.ownerEmail === user?.email)
     if (filter === 'shared') list = list.filter(d => d.ownerEmail !== user?.email)
     if (filter === 'favorites') list = list.filter(d => d.favorite)
+    if (systemFilter !== 'all') list = list.filter(d => (d.dashboardType || 'ems') === systemFilter)
     if (query.trim()) {
       const q = query.trim().toLowerCase()
       list = list.filter(d => d.name.toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q))
     }
     return [...list].sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || new Date(b.updatedAt) - new Date(a.updatedAt))
-  }, [dashboards, filter, query, user])
+  }, [dashboards, filter, systemFilter, query, user])
 
-  function handleCreate(templateId, name, targetDevice) {
-    const id = createDashboard(templateId, name, targetDevice)
+  function handleCreate(templateId, name, targetDevice, dashboardType) {
+    const id = createDashboard(templateId, name, targetDevice, dashboardType)
     navigate(`${basePath}/${id}?edit=1`)
   }
 
@@ -90,6 +93,45 @@ export default function DashboardList() {
         <button type="button" className="btn-primary" onClick={() => setNewOpen(true)}>
           <Plus size={15} /> New Dashboard
         </button>
+      </div>
+
+      {/* System Type Filter Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+        <span className="text-xs font-bold text-surface-500 mr-1 flex items-center gap-1">
+          <Layers size={13} /> System:
+        </span>
+        <button
+          type="button"
+          onClick={() => setSystemFilter('all')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
+            systemFilter === 'all'
+              ? 'bg-primary-500 text-white shadow-sm'
+              : 'bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 border border-surface-200 dark:border-surface-700 hover:bg-surface-50'
+          }`}
+        >
+          All Systems ({dashboards.length})
+        </button>
+        {SYSTEM_TYPES.map(sys => {
+          const count = dashboards.filter(d => (d.dashboardType || 'ems') === sys.id).length
+          const active = systemFilter === sys.id
+          return (
+            <button
+              key={sys.id}
+              type="button"
+              onClick={() => setSystemFilter(sys.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                active
+                  ? 'bg-primary-500 text-white shadow-sm'
+                  : 'bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 border border-surface-200 dark:border-surface-700 hover:bg-surface-50'
+              }`}
+            >
+              <span>{sys.shortName}</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${active ? 'bg-white/20 text-white' : 'bg-surface-100 dark:bg-surface-700 text-surface-500'}`}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
       <div className="card p-3 flex flex-wrap items-center gap-2.5">
@@ -166,14 +208,24 @@ export default function DashboardList() {
                 </div>
                 <p className="text-xs text-surface-500 leading-relaxed line-clamp-2 min-h-[2.2em]">{d.description || 'No description'}</p>
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  <span className={`badge ${
+                    d.dashboardType === 'aqms' ? 'badge-info' :
+                    d.dashboardType === 'soil' ? 'badge-success' :
+                    d.dashboardType === 'weatherstation' ? 'badge-purple' :
+                    d.dashboardType === 'unified' ? 'badge-neutral' : 'badge-primary'
+                  } uppercase font-bold text-[10px]`}>
+                    {SYSTEM_TYPES.find(s => s.id === (d.dashboardType || 'ems'))?.shortName || 'EMS'}
+                  </span>
                   <span className={`badge ${ownIt ? 'badge-info' : 'badge-neutral'} flex items-center gap-1`}>
                     {ownIt ? <User size={10} /> : <Users size={10} />} {ownIt ? 'Yours' : 'Shared'}
                   </span>
-                  <span className="badge badge-purple flex items-center gap-1">
-                    <Cpu size={10} /> Device: {d.targetDevice || 'All Devices'}
-                  </span>
+                  {d.targetDevice && (
+                    <span className="badge badge-purple flex items-center gap-1">
+                      <Cpu size={10} /> {d.targetDevice}
+                    </span>
+                  )}
                   {d.visibility === 'shared' && ownIt && (
-                    <span className="badge badge-success flex items-center gap-1"><Users size={10} /> Shared with org</span>
+                    <span className="badge badge-success flex items-center gap-1"><Users size={10} /> Shared</span>
                   )}
                   <span className="text-[10px] text-surface-400 font-semibold flex items-center gap-1 ml-auto">
                     <Clock size={10} /> {timeAgo(d.updatedAt)}

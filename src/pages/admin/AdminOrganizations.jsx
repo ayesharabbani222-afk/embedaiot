@@ -11,6 +11,7 @@ import { DEVICE_TYPES } from '../../data/deviceTypes'
 import {
   getOrgHierarchyOverride, saveOrgHierarchy, clearOrgHierarchyOverride, renameOrgHierarchyOverride,
 } from '../../data/facilitiesHierarchy'
+import { orgService } from '../../api/orgService'
 
 
 export default function AdminOrganizations() {
@@ -26,6 +27,17 @@ export default function AdminOrganizations() {
       return initialData
     }
   })
+
+  // Fetch live organizations from backend
+  useEffect(() => {
+    orgService.getAll()
+      .then(res => {
+        if (Array.isArray(res) && res.length) {
+          setData(res)
+        }
+      })
+      .catch(err => console.warn('[AdminOrgs] Using local data:', err.message))
+  }, [])
 
   // Save organizations to localStorage whenever they change
   useEffect(() => {
@@ -74,13 +86,23 @@ export default function AdminOrganizations() {
   const openView = (row) => { setSelected(row); setModal('view') }
   const close    = () => { setModal(null); setSelected(null) }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const orgName = form.name.trim()
 
     if (modal === 'add') {
-      setData(d => [...d, { id: Date.now(), ...form, createdAt: new Date().toISOString().slice(0,10) }])
+      try {
+        const created = await orgService.create({ ...form, name: orgName })
+        setData(d => [created, ...d])
+      } catch (e) {
+        setData(d => [...d, { id: Date.now(), ...form, createdAt: new Date().toISOString().slice(0,10) }])
+      }
     } else {
-      setData(d => d.map(r => r.id === selected.id ? { ...r, ...form } : r))
+      try {
+        const updated = await orgService.update(selected.id, form)
+        setData(d => d.map(r => r.id === selected.id ? { ...r, ...updated } : r))
+      } catch (e) {
+        setData(d => d.map(r => r.id === selected.id ? { ...r, ...form } : r))
+      }
       if (origName && origName !== orgName) {
         renameOrgHierarchyOverride(origName, orgName)
       }
@@ -103,8 +125,11 @@ export default function AdminOrganizations() {
     })
   }
 
-  const handleDelete = (row) => {
+  const handleDelete = async (row) => {
     if (confirm(`Delete organization "${row.name}"?`)) {
+      try {
+        await orgService.delete(row.id)
+      } catch (e) {}
       setData(d => d.filter(r => r.id !== row.id))
       clearOrgHierarchyOverride(row.name)
     }

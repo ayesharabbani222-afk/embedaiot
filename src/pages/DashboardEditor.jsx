@@ -134,6 +134,7 @@ export default function DashboardEditor() {
       <AddWidgetModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
+        dashboardType={dashboard.dashboardType || 'ems'}
         onAdd={(widget) => addWidget(dashboard.id, widget)}
       />
 
@@ -142,6 +143,7 @@ export default function DashboardEditor() {
         onClose={() => setSettingsWidget(null)}
         widget={settingsWidget}
         hierarchy={hierarchy}
+        dashboardType={dashboard.dashboardType || 'ems'}
         onSave={(patch) => updateWidget(dashboard.id, settingsWidget.id, patch)}
       />
     </div>

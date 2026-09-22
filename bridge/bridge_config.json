@@ -1,0 +1,35 @@
+{
+  "gateway": {
+    "serialNumber": "SN-10021",
+    "name": "CF-GW-001",
+    "pollIntervalSeconds": 3
+  },
+  "mqtt": {
+    "brokerUrl": "mqtt://localhost:1883",
+    "topicPrefix": "ems/gateways",
+    "qos": 1
+  },
+  "connectionMode": "live_feed",
+  "modbusSettings": {
+    "type": "tcp",
+    "tcpHost": "192.168.1.100",
+    "tcpPort": 502,
+    "serialPort": "COM3",
+    "baudRate": 9600
+  },
+  "mappedDevices": [
+    {
+      "deviceId": 2,
+      "name": "CF Smart Panel",
+      "unitId": 1,
+      "registers": {
+        "voltageA": { "address": 40258, "multiplier": 0.1, "unit": "V" },
+        "voltageB": { "address": 40259, "multiplier": 0.1, "unit": "V" },
+        "voltageC": { "address": 40260, "multiplier": 0.1, "unit": "V" },
+        "currentA": { "address": 40261, "multiplier": 0.01, "unit": "A" },
+        "power":    { "address": 40277, "multiplier": 0.1, "unit": "kW" },
+        "powerFactor": { "address": 40280, "multiplier": 0.001, "unit": "" }
+      }
+    }
+  ]
+}

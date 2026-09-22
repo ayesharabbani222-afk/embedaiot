@@ -5,7 +5,7 @@ import {
   Palette, Settings, Activity, Zap,
   CreditCard, ShoppingBag, Calendar, Layers, Clock,
   BellRing, BrainCircuit, Gauge, TrendingUp, AlertOctagon,
-  LayoutTemplate, ShieldCheck, Boxes,
+  LayoutTemplate, ShieldCheck, Boxes, Radio,
 } from 'lucide-react'
 
 export const adminNav = [
@@ -16,6 +16,7 @@ export const adminNav = [
   { to: '/admin/organizations', label: 'Organizations',    icon: Building2 },
   { to: '/admin/users',         label: 'Users',            icon: Users },
   { to: '/admin/gateways',      label: 'Manage Gateway',   icon: Wifi },
+  { to: '/admin/mqtt-bridges',  label: 'MQTT Bridges',     icon: Radio },
   { to: '/admin/devices',       label: 'Devices',          icon: Cpu },
   { to: '/admin/device-templates', label: 'Device Templates', icon: FileCode2 },
   { to: '/admin/access-groups', label: 'Access Groups',    icon: ShieldCheck },

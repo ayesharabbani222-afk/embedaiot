@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Modal from '../ui/Modal'
-import { WIDGET_TYPES, METRIC_OPTIONS, GROUP_BY_OPTIONS, COLOR_THEMES, widgetTypeMeta } from '../../data/widgetCatalog'
-import { Database, Cpu } from 'lucide-react'
+import { WIDGET_TYPES, METRIC_OPTIONS, GROUP_BY_OPTIONS, COLOR_THEMES, widgetTypeMeta, getMetricsForSystem, SYSTEM_TYPES } from '../../data/widgetCatalog'
+import { Database, Cpu, Filter } from 'lucide-react'
 import { useCustomDashboards } from '../../context/CustomDashboardContext'
 import { devices as allDevices } from '../../data/dummy'
 
@@ -102,7 +102,8 @@ const TIME_WINDOWS = [
   { value: '30d', label: 'Last 30 days' },
 ]
 
-export default function AddWidgetModal({ open, onClose, onAdd }) {
+export default function AddWidgetModal({ open, onClose, onAdd, dashboardType = 'ems' }) {
+  const [selectedSystem, setSelectedSystem] = useState(dashboardType || 'ems')
   const [type, setType]       = useState('line')
   const [title, setTitle]     = useState('')
   const [metric, setMetric]   = useState('energyConsumption')
@@ -110,9 +111,28 @@ export default function AddWidgetModal({ open, onClose, onAdd }) {
   const [color, setColor]     = useState('primary')
   const [targetDevice, setTargetDevice] = useState('')
 
+  useEffect(() => {
+    if (dashboardType) {
+      setSelectedSystem(dashboardType)
+      const sysMetrics = getMetricsForSystem(dashboardType)
+      if (sysMetrics.length > 0 && sysMetrics[0].value !== '_none') {
+        setMetric(sysMetrics[0].value)
+      }
+    }
+  }, [dashboardType, open])
+
   // Resolve orgKey from custom dashboards context
   const { orgKey } = useCustomDashboards()
-  const orgDevices = allDevices.filter(d => d.org === orgKey)
+  const orgDevices = useMemo(() => {
+    const orgFiltered = allDevices.filter(d => d.org === orgKey)
+    if (selectedSystem === 'unified' || selectedSystem === 'all') return orgFiltered
+    const matching = orgFiltered.filter(d => d.deviceType === selectedSystem)
+    return matching.length > 0 ? matching : orgFiltered
+  }, [orgKey, selectedSystem])
+
+  const availableMetrics = useMemo(() => {
+    return getMetricsForSystem(selectedSystem)
+  }, [selectedSystem])
 
   // DB mapping state
   const [dbTable,    setDbTable]    = useState(DB_TABLES[0].value)
@@ -137,13 +157,15 @@ export default function AddWidgetModal({ open, onClose, onAdd }) {
 
   function handleAdd() {
     const meta = widgetTypeMeta(type)
+    const metricLabel = availableMetrics.find(m => m.value === metric)?.label || metric
     onAdd({
       type,
-      title: title.trim() || `${meta.label} — ${METRIC_OPTIONS.find(m => m.value === metric)?.label}`,
+      title: title.trim() || `${meta.label} — ${metricLabel}`,
       metric,
       groupBy: supportsGroupBy ? groupBy : 'none',
       color,
       targetDevice: targetDevice || null, // null = inherit dashboard device association
+      systemType: selectedSystem,
       dbMapping: {
         table: dbTable,
         column: dbColumn,
@@ -190,7 +212,7 @@ export default function AddWidgetModal({ open, onClose, onAdd }) {
 
         <div>
           <label className="label">Widget Title (optional)</label>
-          <input className="input" placeholder="e.g. Building A Energy Consumption" value={title} onChange={e => setTitle(e.target.value)} />
+          <input className="input" placeholder="e.g. Real-time Node Telemetry" value={title} onChange={e => setTitle(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -203,14 +225,39 @@ export default function AddWidgetModal({ open, onClose, onAdd }) {
             <select className="select" value={targetDevice} onChange={e => setTargetDevice(e.target.value)}>
               <option value="">Inherit Dashboard Device Association</option>
               {orgDevices.map(d => (
-                <option key={d.id} value={d.name}>{d.name} ({d.gateway})</option>
+                <option key={d.id} value={d.name}>{d.name} ({d.gateway || d.deviceType || 'Node'})</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="label">Data / Metric</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="label mb-0">Data / Metric</label>
+              <div className="flex items-center gap-1 text-[10px]">
+                <Filter size={10} className="text-surface-400" />
+                <select
+                  value={selectedSystem}
+                  onChange={e => {
+                    const s = e.target.value
+                    setSelectedSystem(s)
+                    const mList = getMetricsForSystem(s)
+                    if (mList.length && mList[0].value !== '_none') setMetric(mList[0].value)
+                  }}
+                  className="bg-transparent text-primary-600 font-bold border-none p-0 cursor-pointer focus:ring-0 text-[10px]"
+                >
+                  <option value="ems">EMS Metrics</option>
+                  <option value="aqms">AQMS Metrics (24 vars)</option>
+                  <option value="soil">Soil Metrics (4 vars)</option>
+                  <option value="weatherstation">Weather Metrics (13 vars)</option>
+                  <option value="all">All Metrics</option>
+                </select>
+              </div>
+            </div>
             <select className="select" value={metric} onChange={e => setMetric(e.target.value)}>
-              {METRIC_OPTIONS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              {availableMetrics.map(m => (
+                <option key={m.value} value={m.value}>
+                  {m.label} {m.category ? `[${m.category}]` : ''}
+                </option>
+              ))}
             </select>
           </div>
         </div>
